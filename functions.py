@@ -48,7 +48,7 @@ def menu():
 def read_df():
     df = pd.read_csv('nba2024.csv')
     df = df.drop('Rk', axis=1)
-    df = df.loc[(df['Player'] != 'League Average') & (df['Team'] != '2TM') & (df['Team'] != '3TM')]
+    df = df.loc[(df['Player'] != 'League Average')]
     return df
 
 def filter_df(df, team, pos, games, minutes):
@@ -89,10 +89,29 @@ def radar_plot(player1, player2, df, fig, ax):
         cols = ['PTS', 'TRB', 'AST', 'BLK', 'STL', 'FG%']
         
         df_normalized = df[cols].apply(lambda x: (x - x.min()) / (x.max() - x.min()), axis=0)
+        df_normalized['Team'] = df['Team']
 
-        player1_stats = df_normalized[df['Player'] == player1].iloc[0].values
-        player2_stats = df_normalized[df['Player'] == player2].iloc[0].values
+        player1_stats = df_normalized.loc[df['Player'] == player1]
+        player2_stats = df_normalized.loc[df['Player'] == player2]
 
+        if len(player1_stats) == 1:
+            player1_stats = player1_stats.drop('Team', axis=1)
+            player1_stats = player1_stats.iloc[0].values
+        else:
+            player1_stats = player1_stats.loc[(player1_stats['Team']=='2TM') | (player1_stats['Team']=='3TM')].reset_index(drop=True)
+            player1_stats = player1_stats.drop('Team', axis=1)
+            player1_stats = player1_stats.iloc[0].values
+
+        if len(player2_stats) == 1:
+            player2_stats = player2_stats.drop('Team', axis=1)
+            player2_stats = player2_stats.iloc[0].values
+        else:
+            player2_stats = player2_stats.loc[(player2_stats['Team']=='2TM') | (player2_stats['Team']=='3TM')].reset_index(drop=True)
+            player2_stats = player2_stats.drop('Team', axis=1)
+            player2_stats = player2_stats.iloc[0].values
+        
+        df_normalized = df_normalized.drop('Team', axis=1)
+        
         player1_stats = np.concatenate((player1_stats, [player1_stats[0]]))
         player2_stats = np.concatenate((player2_stats, [player2_stats[0]]))
 
@@ -121,6 +140,10 @@ def radar_plot(player1, player2, df, fig, ax):
 def df_compare(df, player1, player2):
     cols = ['Player','Team','Pos','PTS', 'TRB', 'AST', 'BLK', 'STL', 'FG%']
     df_table = df.loc[(df.Player == player1) | (df.Player == player2)][cols]
+    if len(df.loc[(df.Player == player1)]) != 1:
+        df_table = df_table.loc[(df_table.Player == player2) | ((df_table.Player == player1) & ((df_table.Team == '2TM') | (df_table.Team == '3TM')))]
+    if len(df.loc[(df.Player == player2)]) != 1:
+        df_table = df_table.loc[(df_table.Player == player1) | ((df_table.Player == player2) & ((df_table.Team == '2TM') | (df_table.Team == '3TM')))]
     df_table[df_table.select_dtypes(include=['number']).columns] = df_table.select_dtypes(include=['number']).apply(lambda col: col.round(3).astype(str))
     return df_table
     
