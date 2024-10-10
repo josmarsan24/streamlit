@@ -6,3 +6,5 @@ To run the app:
 ```bat
 py -m streamlit run streamlit_main.py
 ```
+
+You can check the app in: https://josmarsan24nbademoapp.streamlit.app/
