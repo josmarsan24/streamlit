@@ -8,7 +8,7 @@ menu()
 df = read_df()
 
 team = st.selectbox("Team: ", df['Team'].sort_values().unique(), index=None)
-pos = st.selectbox("Postion: ", df['Pos'].sort_values().unique(), index=None)
+pos = st.selectbox("Position: ", df['Pos'].sort_values().unique(), index=None)
 games = st.slider("Games played:", min_value=0, max_value=82, value=50)
 minutes = st.slider("Minutes played:", min_value=0, max_value=36, value=20)
 x = st.selectbox("x axis: ", df.select_dtypes(include=np.number).columns.sort_values().unique(), index=None)
